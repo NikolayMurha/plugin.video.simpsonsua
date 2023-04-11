@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <!-- Login -->
+    <category label="login">
+        <setting id="simpsons_login" type="text" label="Login" default=""/>
+        <setting id="simpsons_password" type="text" label="Password" default=""/>
+    </category>
+</settings>
