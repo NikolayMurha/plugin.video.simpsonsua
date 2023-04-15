@@ -109,10 +109,10 @@ def load_tiles(url):
         image = "https://simpsonsua.tv/" + figure.find('img')['src']
         season = None
         episode = None
-        season_match = re.search(r'.*(sezon|season)-([0-9]+)/$', url, re.IGNORECASE)
+        season_match = re.search(r'.*?(sezon|season)-([0-9]+)/$', url, re.IGNORECASE)
         if season_match:
             season = season_match.group(2)
-        season_episode_match = re.search(r'.*([0-9]+)-(sezon|season)-([0-9]+)-(seriya|episode)', url, re.IGNORECASE)
+        season_episode_match = re.search(r'.*?([0-9]+)-(sezon|season)-([0-9]+)-(seriya|episode)', url, re.IGNORECASE)
         if season_episode_match:
             season = season_episode_match.group(1)
             episode = season_episode_match.group(3)
