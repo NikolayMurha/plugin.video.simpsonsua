@@ -23,7 +23,7 @@ def root(plugin, content_type="video"):
     :param str content_type: The type of content being listed e.g. video, music. This is passed in from kodi and
                              we have no use for it as of yet.
     """
-    for item in list_tiles(plugin, url_constructor("/"), list_type="root"):
+    for item in list_tiles(plugin, url_constructor("/multserialy-ukrainskoyu/")):
         yield item
 
 
@@ -31,8 +31,6 @@ def root(plugin, content_type="video"):
 def list_tiles(_, url, list_type="root", prefix=""):
     tiles = load_tiles(url)
     for tile in tiles:
-        if list_type != "episodes" and tile["url"][-1] != "/":
-            continue
         item = Listitem()
         item.label = prefix + tile["label"]
         item.art["thumb"] = tile["thumbnail"]
@@ -43,11 +41,9 @@ def list_tiles(_, url, list_type="root", prefix=""):
         else:
             item.info["plot"] = tile["url"]
 
-        if list_type == "root":
-            item.set_callback(list_tiles, url=tile["url"], list_type="seasons")
-        elif list_type == "seasons":
-            item.set_callback(list_tiles, url=tile["url"], list_type="episodes")
-        elif list_type == "episodes":
+        if tile['type'] == "list":
+            item.set_callback(list_tiles, url=tile["url"])
+        else:
             item.set_callback(episode_info, url=tile["url"])
         yield item
 
@@ -61,6 +57,9 @@ def episode_info(_, url):
     subtitle = ""
     description = ""
     title_nodes = bs.select('div.poster.pinktext')
+    if not title_nodes:
+        title_nodes = bs.select('div.poster > h2')
+
     description_nodes = bs.select('div.fullstory')
     if title_nodes and len(title_nodes) > 0:
         title = title_nodes[0].get_text().title()
@@ -78,7 +77,7 @@ def episode_info(_, url):
             continue
         item = Listitem()
         item.info['plot'] = subtitle + "\n" + description
-        item.label = "Плеер " + str(i) + " - " + title
+        item.label = "Джерело " + str(i) + " - " + title
         item.set_callback(play_video, url=player[0]['src'])
         yield item
     if not item:
@@ -93,7 +92,12 @@ def play_video(plugin, url):
     :type plugin: Resolver
     :type url: unicode
     """
-    return plugin.extract_source(url)
+
+    try:
+        return plugin.extract_source(url)
+    except RuntimeError as e:
+        # Cut the error message to 50 characters to avoid long live notification
+        raise RuntimeError(str(e)[0:50]+'...')
 
 
 def load_tiles(url):
@@ -127,8 +131,13 @@ def load_tiles(url):
             title = ("Season {:02d} " + title).format(int(season))
 
         if len(title) == 0:
-            title_search = re.search(r'.*/(.*)\.jpg', image, re.IGNORECASE)
-            title = title_search.group(1)
+            title_search = re.search(r'.*/([0-9]+-)?(.+)(/|.html)', url, re.IGNORECASE)
+            if title_search:
+                title = title_search.group(2)
+            else:
+                title_search = re.search(r'.*/(.*)\.jpg', image, re.IGNORECASE)
+                title = title_search.group(1)
+
             title = re.sub("([a-z])([A-Z])", "\g<1> \g<2>", title)
             title = title.replace('-', ' ').title()
 
@@ -137,6 +146,7 @@ def load_tiles(url):
             description = description[-1].get_text()
 
         result.append({
+            "type": 'list' if url[-1] == '/' else "episode",
             "label": title,
             "url": url,
             "thumbnail": image,
