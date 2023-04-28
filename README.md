@@ -1,1 +1,1 @@
-### Codi Plugin Based on CodeQuick
+### Kodi Plugin Based on CodeQuick
