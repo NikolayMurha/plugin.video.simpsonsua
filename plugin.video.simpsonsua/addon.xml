@@ -20,9 +20,7 @@
         <language>en</language>
         <assets>
             <icon>resources/media/icon.png</icon>
-            <fanart>resources/media/fanart1.jpg</fanart>
-            <fanart>resources/media/fanart2.jpg</fanart>
-            <fanart>resources/media/fanart3.jpg</fanart>
+            <fanart>resources/media/fanart.jpg</fanart>
         </assets>
         <news>[upd] Updated to fix site changes.</news>
         <reuselanguageinvoker>true</reuselanguageinvoker>
